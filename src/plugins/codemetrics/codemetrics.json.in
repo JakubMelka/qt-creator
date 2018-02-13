@@ -1,0 +1,15 @@
+{
+    \"Name\" : \"Code Metrics\",
+    \"Version\" : \"$$QTCREATOR_VERSION\",
+    \"CompatVersion\" : \"$$QTCREATOR_COMPAT_VERSION\",
+    \"Experimental\" : true,
+    \"Vendor\" : \"Jakub Melka\",
+    \"Copyright\" : \"(C) 2018 Jakub Melka\",
+    \"License\" : [ \"GNU General Public License\",
+                  \"\",
+                  \"See file LICENSE for the whole license text.\"
+    ],
+    \"Category\" : \"C++\",
+    \"Description\" : \"Analyzes code metrics of C/C++ source files.\",
+    $$dependencyList
+}
