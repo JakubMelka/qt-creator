@@ -18,6 +18,7 @@
 *****************************************************************************/
 
 #include "codemetricsitem.h"
+#include "codemetricssettings.h"
 
 #include "utils/fileutils.h"
 
@@ -68,6 +69,9 @@ public:
         // This storage contains items selected by headers/sources
         // of the active projects (collected in the projects info).
         QHash<Utils::FileName, CodeMetricsItemPointer> selection;
+
+        // Actual settings selected by user
+        CodeMetricsSettings settings;
     };
 
     void setRequest(Request request);

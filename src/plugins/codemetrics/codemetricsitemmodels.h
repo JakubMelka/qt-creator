@@ -17,6 +17,8 @@
 **  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
+#include "constants.h"
+
 #include <QList>
 #include <QScopedPointer>
 #include <QAbstractItemModel>
@@ -39,6 +41,7 @@ public:
         SourcesDirectory,
         HeaderFile,
         SourceFile,
+        Function,
         Summary
     };
 
@@ -46,6 +49,9 @@ public:
         Kind m_kind = Root;
         QString m_displayName;
         Utils::FileName m_file;
+        Constants::Maintainability m_maintainability = Constants::Invalid;
+        int m_cyclomaticComplexity = -1;
+        int m_instructions = -1;
         int m_lines = -1;
         int m_linesOfCode = -1;
         int m_linesOfComment = -1;
@@ -53,6 +59,7 @@ public:
 
         void init();
         void merge(const ItemData& itemData);
+        void mergeFunctionData(const ItemData& itemData);
     };
 
     explicit ProjectTreeItem(ItemData itemData) : m_itemData(qMove(itemData)) { }
@@ -70,6 +77,7 @@ private:
     QVariant getSortData(int column) const;
     QVariant getIdData(int column) const;
     QVariant getExpandedByDefaultData(int column) const;
+    QVariant getBackgroundColorData(int column) const;
 
     ItemData m_itemData;
 };
@@ -83,6 +91,9 @@ public:
 
     enum Column {
         ProjectOrFileNameColumn,
+        MaintainabilityColumn,
+        CyclomaticComplexityColumn,
+        InstructionsColumn,
         LinesColumn,
         LinesOfCodeColumn,
         LinesOfCommentsColumn,

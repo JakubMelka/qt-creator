@@ -18,6 +18,7 @@
 *****************************************************************************/
 
 #include "codemetricsitemmodels.h"
+#include "codemetricsmaintainability.h"
 #include "constants.h"
 
 #include <QLocale>
@@ -31,6 +32,9 @@ ProjectTreeItemsModel::ProjectTreeItemsModel(ProjectTreeItem *root, QObject *par
 {
     QStringList header;
     header << tr("Project/File");
+    header << tr("Maintainability");
+    header << tr("Cyclomatic complexity");
+    header << tr("Instructions");
     header << tr("Lines");
     header << tr("Lines of Code");
     header << tr("Lines of Comment");
@@ -62,6 +66,7 @@ QVariant ProjectTreeItem::data(int column, int role) const
     case Qt::ToolTipRole: return getToolTipData(column);
     case Qt::SizeHintRole: return getSizeHintData(column);
     case Qt::TextAlignmentRole: return getTextAlignmentData(column);
+    case Qt::BackgroundColorRole: return getBackgroundColorData(column);
     case Constants::SortRole: return getSortData(column);
     case Constants::IdRole: return getIdData(column);
     case Constants::ExpandedByDefaultRole: return getExpandedByDefaultData(column);
@@ -75,16 +80,33 @@ void ProjectTreeItem::calculateDataFromChildren()
     switch (m_itemData.m_kind) {
     case Root:
     case ProjectDirectory:
-        for (int i = 0, count = childCount(); i < count; ++i)
-            childAt(i)->calculateDataFromChildren();
-        // Fall trough! Do not break it here!
-
     case SourcesDirectory:
     case HeadersDirectory:
+        for (int i = 0, count = childCount(); i < count; ++i)
+            childAt(i)->calculateDataFromChildren();
+
         m_itemData.init();
         for (int i = 0, count = childCount(); i < count; ++i) {
             m_itemData.merge(childAt(i)->m_itemData);
         }
+        break;
+
+    case SourceFile:
+    case HeaderFile:
+        m_itemData.m_cyclomaticComplexity = 0;
+        m_itemData.m_instructions = 0;
+
+        for (int i = 0, count = childCount(); i < count; ++i) {
+            m_itemData.mergeFunctionData(childAt(i)->m_itemData);
+        }
+
+        // If we doesn't have any data, reset items to no data.
+        if (m_itemData.m_cyclomaticComplexity == 0)
+            m_itemData.m_cyclomaticComplexity = -1;
+
+        if (m_itemData.m_instructions == 0)
+            m_itemData.m_instructions = -1;
+
         break;
 
     default:
@@ -109,6 +131,15 @@ QVariant ProjectTreeItem::getDisplayData(int column) const
             return m_itemData.m_displayName;
         else
             return m_itemData.m_file.fileName();
+
+    case ProjectTreeItemsModel::MaintainabilityColumn:
+        return CodeMetricsMaintainability::getText(m_itemData.m_maintainability);
+
+    case ProjectTreeItemsModel::CyclomaticComplexityColumn:
+        return m_itemData.m_cyclomaticComplexity > -1 ? QLocale::system().toString(m_itemData.m_cyclomaticComplexity) : QVariant();
+
+    case ProjectTreeItemsModel::InstructionsColumn:
+        return m_itemData.m_instructions > -1 ? QLocale::system().toString(m_itemData.m_instructions) : QVariant();
 
     case ProjectTreeItemsModel::LinesColumn:
         return m_itemData.m_lines > -1 ? QLocale::system().toString(m_itemData.m_lines) : QVariant();
@@ -143,7 +174,7 @@ QVariant ProjectTreeItem::getToolTipData(int column) const
 QVariant ProjectTreeItem::getSizeHintData(int column) const
 {
     if (column == ProjectTreeItemsModel::ProjectOrFileNameColumn)
-        return QSize(300, 0);
+        return QSize(450, 0);
     else
         return QSize(120, 0);
 }
@@ -153,6 +184,9 @@ QVariant ProjectTreeItem::getTextAlignmentData(int column) const
     switch (column) {
     case ProjectTreeItemsModel::ProjectOrFileNameColumn:
         return int(Qt::AlignLeft | Qt::AlignVCenter);
+
+    case ProjectTreeItemsModel::MaintainabilityColumn:
+        return int(Qt::AlignCenter);
 
     default:
         return int(Qt::AlignRight | Qt::AlignVCenter);
@@ -169,6 +203,15 @@ QVariant ProjectTreeItem::getSortData(int column) const
     switch (typedColumn) {
     case ProjectTreeItemsModel::ProjectOrFileNameColumn:
         return getDisplayData(column);
+
+    case ProjectTreeItemsModel::MaintainabilityColumn:
+        return static_cast<int>(m_itemData.m_maintainability);
+
+    case ProjectTreeItemsModel::CyclomaticComplexityColumn:
+        return m_itemData.m_cyclomaticComplexity;
+
+    case ProjectTreeItemsModel::InstructionsColumn:
+        return m_itemData.m_instructions;
 
     case ProjectTreeItemsModel::LinesColumn:
         return m_itemData.m_lines;
@@ -237,17 +280,36 @@ QVariant ProjectTreeItem::getExpandedByDefaultData(int column) const
     case ProjectTreeItem::HeaderFile:
     case ProjectTreeItem::SourceFile:
     case ProjectTreeItem::Summary:
+    case ProjectTreeItem::Function:
         return false;
     }
 
     return QVariant();
 }
 
+QVariant ProjectTreeItem::getBackgroundColorData(int column) const
+{
+    if (column == ProjectTreeItemsModel::MaintainabilityColumn)
+        return CodeMetricsMaintainability::getBackgroundColor(m_itemData.m_maintainability);
+
+    return QColor(Qt::white);
+}
+
 void ProjectTreeItem::ItemData::init()
 {
+    m_maintainability = Constants::Invalid;
+    m_cyclomaticComplexity = 0;
+    m_instructions = 0;
     m_lines = 0;
     m_linesOfCode = 0;
     m_linesOfComment = 0;
+}
+
+void ProjectTreeItem::ItemData::mergeFunctionData(const ProjectTreeItem::ItemData &itemData)
+{
+    m_maintainability = qMax(m_maintainability, itemData.m_maintainability);
+    m_cyclomaticComplexity += itemData.m_cyclomaticComplexity;
+    m_instructions += itemData.m_instructions;
 }
 
 void ProjectTreeItem::ItemData::merge(const ProjectTreeItem::ItemData &itemData)
@@ -255,6 +317,8 @@ void ProjectTreeItem::ItemData::merge(const ProjectTreeItem::ItemData &itemData)
     m_lines += itemData.m_lines;
     m_linesOfCode += itemData.m_linesOfCode;
     m_linesOfComment += itemData.m_linesOfComment;
+
+    mergeFunctionData(itemData);
 }
 
 } // namespace Internal

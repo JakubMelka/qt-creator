@@ -26,6 +26,21 @@
 namespace CodeMetrics {
 namespace Internal {
 
+class CodeMetricsFunctionItem
+{
+public:
+    explicit CodeMetricsFunctionItem() = default;
+
+    void init();
+
+    QString qualifiedFunctionName;
+    int cyclomaticComplexity = -1;
+    int instructions = -1;
+    int lines = -1;
+    int linesOfCode = -1;
+    int linesOfComment = -1;
+};
+
 class CodeMetricsItem
 {
 public:
@@ -39,6 +54,7 @@ public:
     int lines = -1;
     int linesOfCode = -1;
     int linesOfComment = -1;
+    QVector<CodeMetricsFunctionItem> functions;
 };
 
 using CodeMetricsItemPointer = QSharedPointer<CodeMetricsItem>;

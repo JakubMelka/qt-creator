@@ -19,6 +19,7 @@
 
 #include "codemetricsdataprocessor.h"
 #include "codemetricsitemmodels.h"
+#include "codemetricsmaintainability.h"
 #include "constants.h"
 
 #include <coreplugin/fileiconprovider.h>
@@ -173,13 +174,33 @@ void CodeMetricsDataProcessor::processRequest(const CodeMetricsDataProcessor::Re
 
             ProjectTreeItem::ItemData data;
             data.m_file = codeMetrics->file;
-            data.m_kind = isHeader ? ProjectTreeItem::HeaderFile : ProjectTreeItem::HeaderFile;
+            data.m_kind = isHeader ? ProjectTreeItem::HeaderFile : ProjectTreeItem::SourceFile;
             data.m_lines = codeMetrics->lines;
             data.m_linesOfCode = codeMetrics->linesOfCode;
             data.m_linesOfComment = codeMetrics->linesOfComment;
             data.m_icon = Core::FileIconProvider::icon(codeMetrics->file.toFileInfo());
 
-            parent->appendChild(new ProjectTreeItem(qMove(data)));
+            ProjectTreeItem *fileItem = new ProjectTreeItem(qMove(data));
+
+            // Process also the functions
+            for (const CodeMetricsFunctionItem &functionItem : codeMetrics->functions) {
+                ProjectTreeItem::ItemData functionData;
+                functionData.m_file = Utils::FileName::fromString(functionItem.qualifiedFunctionName);
+                functionData.m_kind = ProjectTreeItem::Function;
+                functionData.m_lines = functionItem.lines;
+                functionData.m_linesOfCode = functionItem.linesOfCode;
+                functionData.m_linesOfComment = functionItem.linesOfComment;
+                functionData.m_cyclomaticComplexity = functionItem.cyclomaticComplexity;
+                functionData.m_instructions = functionItem.instructions;
+
+                const auto m = CodeMetricsMaintainability::calculate(functionItem.cyclomaticComplexity,
+                                                                     functionItem.instructions,
+                                                                     request.settings);
+                functionData.m_maintainability = m;
+                fileItem->appendChild(new ProjectTreeItem(qMove(functionData)));
+            }
+
+            parent->appendChild(fileItem);
         }
     };
 

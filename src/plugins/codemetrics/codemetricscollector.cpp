@@ -18,6 +18,7 @@
 *****************************************************************************/
 
 #include "codemetricscollector.h"
+#include "codemetricsfunctionvisitor.h"
 
 #include <cplusplus/TranslationUnit.h>
 
@@ -120,6 +121,14 @@ void CodeMetricsCollector::collectCodeMetrics(CPlusPlus::Document::Ptr document)
             lastCodeLine = tokenLineEnd;
         }
         item->linesOfCode = lineCodeCount;
+    }
+
+    if (translationUnit->isParsed()) {
+        // Collect function-level code metrics
+        CodeMetricsFunctionVisitor visitor(translationUnit);
+
+        visitor.accept(translationUnit->ast());
+        item->functions = visitor.takeItems();
     }
 
     emit codeMetricsCollected(item);

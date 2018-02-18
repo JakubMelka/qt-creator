@@ -9,7 +9,9 @@ HEADERS = codemetricsplugin.h \
     codemetricscollector.h \
     codemetricssettings.h \
     codemetricsitemmodels.h \
-    codemetricsdataprocessor.h
+    codemetricsdataprocessor.h \
+    codemetricsfunctionvisitor.h \
+    codemetricsmaintainability.h
 
 SOURCES = codemetricsplugin.cpp \
     codemetricsoutputpane.cpp \
@@ -19,4 +21,6 @@ SOURCES = codemetricsplugin.cpp \
     codemetricscollector.cpp \
     codemetricssettings.cpp \
     codemetricsitemmodels.cpp \
-    codemetricsdataprocessor.cpp
+    codemetricsdataprocessor.cpp \
+    codemetricsfunctionvisitor.cpp \
+    codemetricsmaintainability.cpp
