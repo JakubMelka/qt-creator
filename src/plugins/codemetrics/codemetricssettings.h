@@ -37,6 +37,17 @@ class CodeMetricsSettings
 public:
     CodeMetricsScope scope = ScopeActiveProject;
 
+    // Maintainability sensitivity parameters. To compute maintainability
+    // of the code, these values are used to compute the portions of the
+    // maintainability. There are two variables, from which is computed
+    // maintainability, cyclomatic complexity and instruction count.
+    // If the sensitivity of the cyclomatic complexity is 5, then
+    // the corresponding normal level maintainability is 15. Similarly,
+    // if instructions sensitivity is 25, then 75 instructions are
+    // regarded as normal level maintainability.
+    int ccSensitivity = 5;
+    int insSensitivity = 25;
+
     void save(QSettings *settings) const;
     void load(QSettings *settings);
 

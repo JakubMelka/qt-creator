@@ -17,27 +17,37 @@
 **  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 *****************************************************************************/
 
-#include "codemetricsitem.h"
+#pragma once
+
+#include "codemetricssettings.h"
+#include "constants.h"
+
+#include <QtCore>
+#include <QColor>
+#include <QString>
 
 namespace CodeMetrics {
 namespace Internal {
 
-bool CodeMetricsItem::operator==(const CodeMetricsItem &other) const
+// This class is used to compute maintainability from the code metrics,
+// and to get text/background color for different maintainability levels.
+class CodeMetricsMaintainability
 {
-    return file == other.file
-            && lines == other.lines
-            && linesOfCode == other.linesOfCode
-            && linesOfComment == other.linesOfComment;
-}
+    Q_DECLARE_TR_FUNCTIONS(CodeMetrics::Internal::CodeMetricsMaintainability)
 
-void CodeMetricsFunctionItem::init()
-{
-    cyclomaticComplexity = 1;
-    instructions = 0;
-    lines = 0;
-    linesOfCode = 0;
-    linesOfComment = 0;
-}
+public:
+
+    // Calculates maintainability from the given code metrics
+    static Constants::Maintainability calculate(int cyclomaticComplexity,
+                                                int instructionCount,
+                                                const CodeMetricsSettings& settings);
+
+    static QString getText(const Constants::Maintainability maintainability);
+    static QColor getBackgroundColor(const Constants::Maintainability maintainability);
+
+private:
+    CodeMetricsMaintainability() = delete;
+};
 
 } // namespace Internal
 } // namespace CodeMetrics

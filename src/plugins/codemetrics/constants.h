@@ -29,6 +29,8 @@ const char OUTPUT_PANE_TITLE[] = QT_TRANSLATE_NOOP("CodeMetrics::Internal::CodeM
 
 Q_CONSTEXPR char SETTINGS_GROUP[] = "CodeMetricsPlugin";
 Q_CONSTEXPR char SCOPE[] = "Scope";
+Q_CONSTEXPR char CYCLOMATIC_COMPLEXITY_SENSITIVITY[] = "CC_Sensitivity";
+Q_CONSTEXPR char INSTRUCTIONS_SENSITIVITY[] = "INS_Sensitivity";
 
 Q_CONSTEXPR int DATA_PROCESSOR_REQUEST_DELAY = 1000;
 
@@ -51,6 +53,18 @@ enum UserRoles {
     // This role returns boolean, which is a hint, if the tree node
     // should be expanded by default.
     ExpandedByDefaultRole
+};
+
+// Maintainability of the code, 5 different levels. Excellent means that
+// code is good, easy to maintain, appaling means, that code is hard to
+// maintain.
+enum Maintainability {
+    Invalid = 0,
+    Excellent = 1,
+    Good = 2,
+    Normal = 3,
+    Bad = 4,
+    Appalling = 5
 };
 
 } // namespace Constants

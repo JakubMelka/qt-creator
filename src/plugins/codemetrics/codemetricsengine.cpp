@@ -298,6 +298,10 @@ void CodeMetricsEngine::createCodeMetricsModelAsync()
             request.projects = projectInfo.values();
         }
 
+        // Reserve the same size as the item storage. This is important, so we dont
+        // reallocate memory much often.
+        request.selection.reserve(m_itemStorage.size());
+
         for (const CodeMetricsDataProcessor::Request::ProjectInfo& projectInfo : request.projects) {
             // Insert all header file collected metrics
             for (const Utils::FileName& headerFile : projectInfo.headers) {
@@ -321,6 +325,9 @@ void CodeMetricsEngine::createCodeMetricsModelAsync()
                 }
             }
         }
+
+        // Set active settings to the request
+        request.settings = m_settings;
 
         // Now, we have prepared the data. We can pass them to the data processor.
         m_codeMetricsDataProcessor->setRequest(qMove(request));

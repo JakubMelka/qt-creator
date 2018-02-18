@@ -29,6 +29,8 @@ void CodeMetricsSettings::save(QSettings *settings) const
 {
     settings->beginGroup(Constants::SETTINGS_GROUP);
     settings->setValue(Constants::SCOPE, scope);
+    settings->setValue(Constants::CYCLOMATIC_COMPLEXITY_SENSITIVITY, ccSensitivity);
+    settings->setValue(Constants::INSTRUCTIONS_SENSITIVITY, insSensitivity);
     settings->endGroup();
 }
 
@@ -39,12 +41,17 @@ void CodeMetricsSettings::load(QSettings* settings)
     QVariant scopeVariant = settings->value(Constants::SCOPE, ScopeActiveProject);
     scope = static_cast<CodeMetricsScope>(scopeVariant.toInt());
 
+    ccSensitivity = settings->value(Constants::CYCLOMATIC_COMPLEXITY_SENSITIVITY, 5).toInt();
+    insSensitivity = settings->value(Constants::INSTRUCTIONS_SENSITIVITY, 25).toInt();
+
     settings->endGroup();
 }
 
 bool CodeMetricsSettings::operator==(const CodeMetricsSettings &other) const
 {
-    return scope == other.scope;
+    return scope == other.scope &&
+            ccSensitivity == other.ccSensitivity &&
+            insSensitivity == other.insSensitivity;
 }
 
 } // namespace Internal
