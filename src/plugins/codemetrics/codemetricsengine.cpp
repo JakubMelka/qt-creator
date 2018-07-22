@@ -150,6 +150,12 @@ void CodeMetricsEngine::freeCodeMetricsDataProcessor()
 void CodeMetricsEngine::updateCodeMetricsModel(UpdateMode updateMode)
 {
     QMutexLocker lock(&m_mutex);
+
+    // If we already have pending delayed update, then exit this function,
+    // because update will be processed some time later.
+    if (m_updateNeeded && updateMode == Delayed)
+        return;
+
     m_updateNeeded = true;
 
     lock.unlock();

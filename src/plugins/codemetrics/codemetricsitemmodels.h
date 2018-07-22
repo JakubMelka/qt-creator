@@ -29,6 +29,15 @@
 namespace CodeMetrics {
 namespace Internal {
 
+struct SourceLocationData
+{
+    SourceLocationData() = default;
+    SourceLocationData(Utils::FileName file, int line) : m_file(qMove(file)), m_line(line) { }
+
+    Utils::FileName m_file;
+    int m_line = -1;
+};
+
 class ProjectTreeItem : public Utils::TypedTreeItem<ProjectTreeItem>
 {
 public:
@@ -49,6 +58,7 @@ public:
         Kind m_kind = Root;
         QString m_displayName;
         Utils::FileName m_file;
+        int m_line = -1;
         Constants::Maintainability m_maintainability = Constants::Invalid;
         int m_cyclomaticComplexity = -1;
         int m_instructions = -1;
@@ -78,6 +88,7 @@ private:
     QVariant getIdData(int column) const;
     QVariant getExpandedByDefaultData(int column) const;
     QVariant getBackgroundColorData(int column) const;
+    QVariant getSourceLocationData(int column) const;
 
     ItemData m_itemData;
 };
@@ -109,3 +120,5 @@ public:
 
 } // namespace Internal
 } // namespace CodeMetrics
+
+Q_DECLARE_METATYPE(CodeMetrics::Internal::SourceLocationData)

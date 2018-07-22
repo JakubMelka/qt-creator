@@ -52,7 +52,10 @@ enum UserRoles {
 
     // This role returns boolean, which is a hint, if the tree node
     // should be expanded by default.
-    ExpandedByDefaultRole
+    ExpandedByDefaultRole,
+
+    // This role returns source location (file name / line number).
+    SourceLocationRole
 };
 
 // Maintainability of the code, 5 different levels. Excellent means that

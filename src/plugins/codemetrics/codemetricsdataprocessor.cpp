@@ -48,6 +48,7 @@ void CodeMetricsDataProcessor::stopProcessor()
     QMutexLocker lock(&m_mutex);
     if (m_state != Inactive) {
         m_state = Finishing;
+        m_waitCondition.wakeOne();
         lock.unlock();
         wait();
     }
@@ -186,6 +187,7 @@ void CodeMetricsDataProcessor::processRequest(const CodeMetricsDataProcessor::Re
             for (const CodeMetricsFunctionItem &functionItem : codeMetrics->functions) {
                 ProjectTreeItem::ItemData functionData;
                 functionData.m_file = Utils::FileName::fromString(functionItem.qualifiedFunctionName);
+                functionData.m_line = functionItem.line;
                 functionData.m_kind = ProjectTreeItem::Function;
                 functionData.m_lines = functionItem.lines;
                 functionData.m_linesOfCode = functionItem.linesOfCode;

@@ -71,6 +71,7 @@ private slots:
 
 private:
     void initWidgets();
+    void codeMetricsTreeViewClicked(const QModelIndex &index);
 
     QModelIndex selectedIndex() const;
     QModelIndex nextModelIndex() const;

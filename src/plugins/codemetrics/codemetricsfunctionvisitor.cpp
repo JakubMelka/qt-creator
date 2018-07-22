@@ -375,8 +375,28 @@ bool CodeMetricsFunctionVisitor::visit(CPlusPlus::FunctionDefinitionAST *ast)
     CodeMetricsFunctionItem item;
     item.init();
 
+    // Get the fully qualified name
     CPlusPlus::Overview overview;
-    item.qualifiedFunctionName = overview.prettyName(CPlusPlus::LookupContext::fullyQualifiedName(ast->symbol));
+    if (ast->symbol)
+        item.qualifiedFunctionName = overview.prettyName(CPlusPlus::LookupContext::fullyQualifiedName(ast->symbol));
+    else if (ast->declarator && ast->declarator->core_declarator) {
+        // For some reason, we cannot get the symbol from the ast tree. We use raw declarator.
+        CPlusPlus::CoreDeclaratorAST *declarator = ast->declarator->core_declarator;
+        unsigned firstDeclaratorToken = declarator->firstToken();
+        unsigned lastDeclaratorToken = declarator->lastToken();
+
+        for (unsigned tokenIndex = firstDeclaratorToken; tokenIndex <= lastDeclaratorToken; ++tokenIndex) {
+            const CPlusPlus::Token& token = tokenAt(tokenIndex);
+            const char* tokenSource = translationUnit()->firstSourceChar() + token.bytesBegin();
+            item.qualifiedFunctionName += QString::fromUtf8(tokenSource, token.bytes());
+        }
+    }
+
+    // Get the line number for function definition
+    unsigned line = 0;
+    unsigned column = 0;
+    getTokenStartPosition(ast->firstToken(), &line, &column);
+    item.line = line;
 
     m_functionStack.push(qMove(item));
     return true;
