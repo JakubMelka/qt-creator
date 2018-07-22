@@ -34,6 +34,7 @@ public:
     void init();
 
     QString qualifiedFunctionName;
+    int line = -1;
     int cyclomaticComplexity = -1;
     int instructions = -1;
     int lines = -1;

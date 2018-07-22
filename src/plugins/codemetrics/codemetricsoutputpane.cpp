@@ -20,6 +20,7 @@
 #include "codemetricsoutputpane.h"
 #include "codemetricstreeview.h"
 #include "codemetricsplugin.h"
+#include "codemetricsitemmodels.h"
 #include "constants.h"
 
 #include <utils/utilsicons.h>
@@ -27,6 +28,7 @@
 #include <coreplugin/find/itemviewfind.h>
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <coreplugin/actionmanager/command.h>
+#include <coreplugin/editormanager/editormanager.h>
 
 #include <QAction>
 #include <QToolButton>
@@ -210,6 +212,7 @@ void CodeMetricsOutputPane::initWidgets()
 {
     // Create tree view for displaying the code metrics
     m_treeView = new CodeMetricsTreeView(Q_NULLPTR);
+    connect(m_treeView, &CodeMetricsTreeView::clicked, this, &CodeMetricsOutputPane::codeMetricsTreeViewClicked);
 
     // Create a proxy model for filtering/sorting
     m_filterProxyModel = new QSortFilterProxyModel(m_treeView);
@@ -264,6 +267,16 @@ void CodeMetricsOutputPane::initWidgets()
 
     connect(m_expandCollapseAction, &QAction::toggled,
             this, &CodeMetricsOutputPane::expandCollapseActionToggled);
+}
+
+void CodeMetricsOutputPane::codeMetricsTreeViewClicked(const QModelIndex &index)
+{
+    QVariant sourceLocation = index.data(Constants::SourceLocationRole);
+    if (sourceLocation.isValid()) {
+        SourceLocationData location = sourceLocation.value<SourceLocationData>();
+        if (location.m_file.exists())
+            Core::EditorManager::openEditorAt(location.m_file.toString(), location.m_line);
+    }
 }
 
 QModelIndex CodeMetricsOutputPane::selectedIndex() const

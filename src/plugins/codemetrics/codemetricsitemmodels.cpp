@@ -70,6 +70,7 @@ QVariant ProjectTreeItem::data(int column, int role) const
     case Constants::SortRole: return getSortData(column);
     case Constants::IdRole: return getIdData(column);
     case Constants::ExpandedByDefaultRole: return getExpandedByDefaultData(column);
+    case Constants::SourceLocationRole: return getSourceLocationData(column);
     }
 
     return QVariant();
@@ -295,11 +296,40 @@ QVariant ProjectTreeItem::getBackgroundColorData(int column) const
     return QColor(Qt::white);
 }
 
+QVariant ProjectTreeItem::getSourceLocationData(int column) const
+{
+    Q_UNUSED(column);
+
+    switch (m_itemData.m_kind) {
+    case ProjectTreeItem::Root:
+    case ProjectTreeItem::ProjectDirectory:
+    case ProjectTreeItem::HeadersDirectory:
+    case ProjectTreeItem::SourcesDirectory:
+    case ProjectTreeItem::Summary:
+        return QVariant();
+
+    case ProjectTreeItem::HeaderFile:
+    case ProjectTreeItem::SourceFile:
+        return QVariant::fromValue(SourceLocationData(m_itemData.m_file, 0));
+
+    case ProjectTreeItem::Function: {
+        SourceLocationData parentLocation = parent()->data(column, Constants::SourceLocationRole).value<SourceLocationData>();
+        if (!parentLocation.m_file.isEmpty())
+            return QVariant::fromValue(SourceLocationData(parentLocation.m_file, m_itemData.m_line));
+        else
+            return QVariant();
+    }
+    }
+
+    return QVariant();
+}
+
 void ProjectTreeItem::ItemData::init()
 {
     m_maintainability = Constants::Invalid;
     m_cyclomaticComplexity = 0;
     m_instructions = 0;
+    m_line = 0;
     m_lines = 0;
     m_linesOfCode = 0;
     m_linesOfComment = 0;
