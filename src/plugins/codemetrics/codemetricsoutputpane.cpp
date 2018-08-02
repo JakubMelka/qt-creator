@@ -177,7 +177,7 @@ void CodeMetricsOutputPane::scopeButtonClicked(QAbstractButton *button)
     } else if (button == m_scopeCurrentProjectButton) {
         scope = ScopeCurrentSubproject;
     } else {
-        Q_ASSERT_X(false, "CodeMetricsOutputPane::scopeButtonClicked", "Unknown scope button clicked!");
+        Q_ASSERT_X(false, __FUNCTION__, "Unknown scope button clicked!");
     }
 
     CodeMetricsSettings settings = m_plugin->settings();

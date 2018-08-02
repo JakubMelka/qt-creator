@@ -392,11 +392,26 @@ bool CodeMetricsFunctionVisitor::visit(CPlusPlus::FunctionDefinitionAST *ast)
         }
     }
 
+    if (ast->function_body) {
+        unsigned bodyStartToken = ast->function_body->firstToken();
+        unsigned bodyEndToken = ast->function_body->lastToken();
+        unsigned startLine = 0;
+        unsigned endLine = 0;
+        getTokenStartPosition(bodyStartToken, &startLine, nullptr);
+        getTokenEndPosition(bodyEndToken, &endLine, nullptr);
+
+        Q_ASSERT_X(endLine >= startLine, __FUNCTION__, "Ending line of the function body is before the start line!");
+        item.lines = endLine + 1 - startLine;
+    }
+
     // Get the line number for function definition
     unsigned line = 0;
     unsigned column = 0;
     getTokenStartPosition(ast->firstToken(), &line, &column);
     item.line = line;
+
+    item.linesOfCode = -1;
+    item.linesOfComment = -1;
 
     m_functionStack.push(qMove(item));
     return true;

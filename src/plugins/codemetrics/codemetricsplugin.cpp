@@ -35,6 +35,7 @@ CodeMetricsPlugin::CodeMetricsPlugin() :
 
 CodeMetricsPlugin::~CodeMetricsPlugin()
 {
+
 }
 
 bool CodeMetricsPlugin::initialize(const QStringList &args, QString *errMsg)
@@ -57,15 +58,13 @@ bool CodeMetricsPlugin::initialize(const QStringList &args, QString *errMsg)
 
 void CodeMetricsPlugin::createEngine()
 {
-    m_engine = new CodeMetricsEngine(Q_NULLPTR);
+    m_engine = new CodeMetricsEngine(this);
     m_engine->setSettings(m_settings);
-    addAutoReleasedObject(m_engine);
 }
 
 void CodeMetricsPlugin::createOutputPane()
 {
-    m_outputPane = new CodeMetricsOutputPane(this, Q_NULLPTR);
-    addAutoReleasedObject(m_outputPane);
+    m_outputPane = new CodeMetricsOutputPane(this, this);
 }
 
 void CodeMetricsPlugin::loadSettings()
